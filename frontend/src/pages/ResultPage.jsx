@@ -10,12 +10,15 @@ export default function ResultPage() {
   }
 
   return (
-    <div style={{ padding: 16, maxWidth: 480 }}>
-      <h1>결과</h1>
-      <p>
-        <Link to={`/team/${teamId}/lunch`}>← 투표로</Link>
+    <div style={{ padding: 16, maxWidth: 480, margin: '0 auto' }}>
+      <h1>오늘의 점심 결과</h1>
+      <p style={{ margin: '4px 0 16px', color: '#555', fontSize: 14 }}>
+        이 팀의 투표 결과를 바탕으로 최종 식당을 보여줍니다.
+      </p>
+      <p style={{ margin: '0 0 16px' }}>
+        <Link to={`/team/${teamId}/lunch`}>← 투표 화면으로</Link>
         {' · '}
-        <Link to={`/team/${teamId}/setup`}>팀원 설정</Link>
+        <Link to={`/team/${teamId}/setup`}>팀원 다시 설정</Link>
       </p>
       <ResultCard teamId={teamId} />
     </div>

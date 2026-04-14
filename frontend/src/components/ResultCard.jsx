@@ -44,12 +44,20 @@ export default function ResultCard({ teamId }) {
   if (!data) return null;
 
   return (
-    <div>
-      <p>팀 ID: {data.teamId}</p>
-      <p>
-        <strong>{data.restaurantName}</strong> (식당 ID: {data.restaurantId})
+    <div
+      style={{
+        marginTop: 16,
+        padding: 16,
+        borderRadius: 8,
+        border: '1px solid #eee',
+        background: '#fafafa',
+      }}
+    >
+      <p style={{ margin: '0 0 4px' }}>팀 ID: {data.teamId}</p>
+      <p style={{ margin: '0 0 4px' }}>
+        오늘의 점심은 <strong>{data.restaurantName}</strong> (식당 ID: {data.restaurantId})
       </p>
-      <p>사유: {data.reason}</p>
+      <p style={{ margin: 0 }}>선택 이유: {data.reason}</p>
     </div>
   );
 }

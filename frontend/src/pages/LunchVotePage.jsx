@@ -80,12 +80,15 @@ export default function LunchVotePage() {
   }
 
   return (
-    <div style={{ padding: 16, maxWidth: 560 }}>
+    <div style={{ padding: 16, maxWidth: 560, margin: '0 auto' }}>
       <h1>추천 · 투표</h1>
-      <p>
+      <p style={{ margin: '4px 0 12px', color: '#555', fontSize: 14 }}>
+        팀원을 선택하고 원하는 후보에 투표하면, 결과 화면에서 최종 식당이 정해집니다.
+      </p>
+      <p style={{ margin: '0 0 16px' }}>
         <Link to={`/team/${teamId}/setup`}>← 팀원 설정</Link>
         {' · '}
-        <Link to={`/team/${teamId}/result`}>결과 →</Link>
+        <Link to={`/team/${teamId}/result`}>결과 보기 →</Link>
       </p>
 
       <RecommendForm

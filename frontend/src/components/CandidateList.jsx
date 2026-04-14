@@ -16,17 +16,27 @@ export default function CandidateList({ candidates, children }) {
       {candidates.length > 0 && (
         <>
           <h2>후보</h2>
-          <ul style={{ listStyle: 'none', padding: 0 }}>
+          <ul style={{ listStyle: 'none', padding: 0, marginTop: 8 }}>
             {candidates.map((r) => (
-              <li key={r.id} style={{ marginBottom: 8 }}>
-                <label>
+              <li
+                key={r.id}
+                style={{
+                  marginBottom: 8,
+                  padding: 8,
+                  borderRadius: 6,
+                  border: '1px solid #eee',
+                }}
+              >
+                <label style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
                   <input
                     type="radio"
                     name="restaurant"
                     checked={selectedRestaurantId === r.id}
                     onChange={() => setSelectedRestaurantId(r.id)}
-                  />{' '}
-                  {r.name} · {r.category} · {r.distance}분 · {r.priceRange}원대
+                  />
+                  <span>
+                    <strong>{r.name}</strong> · {r.category} · {r.distance}분 · {r.priceRange}원대
+                  </span>
                 </label>
               </li>
             ))}
