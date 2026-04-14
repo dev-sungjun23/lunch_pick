@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { recommend, castVote } from '../api.js';
 import RecommendForm from '../components/RecommendForm.jsx';
 import CandidateList from '../components/CandidateList.jsx';
 import VoteActions from '../components/VoteActions.jsx';
-import { loadMembers } from '../components/memberStorage.js';
+import useTeamMembers from '../hooks/useTeamMembers.js';
 
 export default function LunchVotePage() {
   const { teamId: teamIdParam } = useParams();
@@ -15,17 +15,11 @@ export default function LunchVotePage() {
   const [budget, setBudget] = useState('10000');
   const [candidates, setCandidates] = useState([]);
   const [memberId, setMemberId] = useState('');
-  const [members, setMembers] = useState([]);
+  const { members } = useTeamMembers(teamId);
   const [error, setError] = useState('');
   const [loadingRec, setLoadingRec] = useState(false);
   const [loadingVote, setLoadingVote] = useState(false);
   const [voteOk, setVoteOk] = useState('');
-
-  useEffect(() => {
-    if (!Number.isNaN(teamId)) {
-      setMembers(loadMembers(teamId));
-    }
-  }, [teamId]);
 
   async function handleRecommend(e) {
     e.preventDefault();

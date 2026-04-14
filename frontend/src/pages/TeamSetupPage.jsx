@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import { createTeam, createMember } from '../api.js';
 import TeamForm from '../components/TeamForm.jsx';
 import MemberForm from '../components/MemberForm.jsx';
 import MembersList from '../components/MembersList.jsx';
-import { loadMembers, saveMembers } from '../components/memberStorage.js';
+import useTeamMembers from '../hooks/useTeamMembers.js';
 
 export default function TeamSetupPage() {
   const { teamId: teamIdParam } = useParams();
@@ -13,17 +13,9 @@ export default function TeamSetupPage() {
 
   const [teamName, setTeamName] = useState('');
   const [memberName, setMemberName] = useState('');
-  const [members, setMembers] = useState([]);
+  const { members, addMember } = useTeamMembers(teamId);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
-  useEffect(() => {
-    if (teamId && !Number.isNaN(teamId)) {
-      setMembers(loadMembers(teamId));
-    } else {
-      setMembers([]);
-    }
-  }, [teamId]);
 
   async function handleCreateTeam(e) {
     e.preventDefault();
@@ -46,9 +38,7 @@ export default function TeamSetupPage() {
     setLoading(true);
     try {
       const res = await createMember({ teamId, name: memberName.trim() });
-      const next = [...members, { id: res.id, name: res.name }];
-      setMembers(next);
-      saveMembers(teamId, next);
+      addMember({ id: res.id, name: res.name });
       setMemberName('');
     } catch (err) {
       setError(err.message || '팀원 추가 실패');
