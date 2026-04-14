@@ -74,7 +74,8 @@ public class RecommendationService {
             .fromHttpUrl(KAKAO_LOCAL_SEARCH_URL)
             .queryParam("query", query)
             .queryParam("size", KAKAO_FETCH_SIZE)
-            .build(true)
+            .build()
+            .encode()
             .toUriString();
 
         HttpHeaders headers = new HttpHeaders();
