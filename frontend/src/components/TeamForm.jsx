@@ -18,10 +18,7 @@ export default function TeamForm({ teamName, onTeamNameChange, onSubmit, loading
         disabled={loading}
         style={{
           padding: '8px 12px',
-          borderRadius: 4,
-          border: '1px solid #ccc',
-          background: loading ? '#eee' : '#f5f5f5',
-          cursor: loading ? 'default' : 'pointer',
+          borderRadius: 8,
         }}
       >
         팀 생성

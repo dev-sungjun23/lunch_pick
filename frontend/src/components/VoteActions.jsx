@@ -52,10 +52,7 @@ export default function VoteActions({
         style={{
           alignSelf: 'flex-start',
           padding: '8px 12px',
-          borderRadius: 4,
-          border: '1px solid #ccc',
-          background: !canVote || loadingVote ? '#eee' : '#f5f5f5',
-          cursor: !canVote || loadingVote ? 'default' : 'pointer',
+          borderRadius: 8,
         }}
       >
         투표하기
@@ -63,7 +60,7 @@ export default function VoteActions({
       {!selectedRestaurantId && candidatesLength > 0 && (
         <span style={{ fontSize: 12, color: '#666' }}>후보를 먼저 선택하세요</span>
       )}
-      {voteOk && <p style={{ color: 'green', margin: 0 }}>{voteOk}</p>}
+      {voteOk && <p className="success-text">{voteOk}</p>}
     </form>
   );
 }

@@ -49,9 +49,9 @@ export default function TeamSetupPage() {
 
   if (!teamId || Number.isNaN(teamId)) {
     return (
-      <div style={{ padding: 16, maxWidth: 480, margin: '0 auto' }}>
+      <div className="page-shell" style={{ padding: 16, maxWidth: 480, margin: '0 auto' }}>
         <h1>점심 팀 만들기</h1>
-        <p style={{ margin: '4px 0 16px', color: '#555', fontSize: 14 }}>
+        <p className="info-text">
           1) 팀을 만들고 → 2) 팀원을 추가한 뒤 → 3) 점심 추천 · 투표를 진행합니다.
         </p>
         <TeamForm
@@ -60,15 +60,15 @@ export default function TeamSetupPage() {
           onSubmit={handleCreateTeam}
           loading={loading}
         />
-        {error && <p style={{ color: 'crimson', marginTop: 8 }}>{error}</p>}
+        {error && <p className="error-text">{error}</p>}
       </div>
     );
   }
 
   return (
-    <div style={{ padding: 16, maxWidth: 480, margin: '0 auto' }}>
+    <div className="page-shell" style={{ padding: 16, maxWidth: 480, margin: '0 auto' }}>
       <h1>팀원 추가 (teamId: {teamId})</h1>
-      <p style={{ margin: '4px 0 16px', color: '#555', fontSize: 14 }}>
+      <p className="info-text">
         팀원을 모두 추가했다면 아래 버튼으로 추천 · 투표 화면으로 이동하세요.
       </p>
       <MemberForm
@@ -78,7 +78,7 @@ export default function TeamSetupPage() {
         loading={loading}
       />
       <MembersList members={members} />
-      {error && <p style={{ color: 'crimson', marginTop: 8 }}>{error}</p>}
+      {error && <p className="error-text">{error}</p>}
       <p style={{ marginTop: 16 }}>
         <Link to={`/team/${teamId}/lunch`}>점심 정하기 화면으로 →</Link>
       </p>

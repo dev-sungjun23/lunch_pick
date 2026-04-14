@@ -37,10 +37,10 @@ export default function ResultCard({ teamId }) {
   }, [id]);
 
   if (Number.isNaN(id)) {
-    return <p style={{ color: 'crimson' }}>잘못된 teamId</p>;
+    return <p className="error-text">잘못된 teamId</p>;
   }
   if (loading) return <p>계산 중…</p>;
-  if (error) return <p style={{ color: 'crimson' }}>{error}</p>;
+  if (error) return <p className="error-text">{error}</p>;
   if (!data) return null;
 
   return (
