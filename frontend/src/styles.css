@@ -111,3 +111,27 @@ a:hover {
   color: #166534;
   font-size: 14px;
 }
+
+.next-step-wrap {
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid #eef2f7;
+}
+
+a.next-step-btn {
+  display: inline-block;
+  padding: 10px 14px;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  background: #f8fafc;
+  color: #111827;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+a.next-step-btn:hover {
+  background: #f1f5f9;
+  border-color: #9ca3af;
+  text-decoration: none;
+}

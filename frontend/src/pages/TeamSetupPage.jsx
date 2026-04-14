@@ -82,6 +82,11 @@ export default function TeamSetupPage() {
       <p style={{ marginTop: 16 }}>
         <Link to={`/team/${teamId}/lunch`}>점심 정하기 화면으로 →</Link>
       </p>
+      <div className="next-step-wrap">
+        <Link className="next-step-btn" to={`/team/${teamId}/lunch`}>
+          점심 정하기 →
+        </Link>
+      </div>
     </div>
   );
 }

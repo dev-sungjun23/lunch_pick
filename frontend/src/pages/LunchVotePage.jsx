@@ -112,6 +112,11 @@ export default function LunchVotePage() {
       </CandidateList>
 
       {error && <p className="error-text">{error}</p>}
+      <div className="next-step-wrap">
+        <Link className="next-step-btn" to={`/team/${teamId}/result`}>
+          결과 보기 →
+        </Link>
+      </div>
     </div>
   );
 }
