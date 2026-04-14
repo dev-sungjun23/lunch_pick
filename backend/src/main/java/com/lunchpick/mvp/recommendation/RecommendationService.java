@@ -18,6 +18,8 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URI;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -70,18 +72,19 @@ public class RecommendationService {
             return List.of();
         }
 
-        String url = UriComponentsBuilder
+        URI uri = UriComponentsBuilder
             .fromHttpUrl(KAKAO_LOCAL_SEARCH_URL)
             .queryParam("query", query)
             .queryParam("size", KAKAO_FETCH_SIZE)
-            .build(true)
-            .toUriString();
+            .encode()
+            .build()
+            .toUri();
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "KakaoAK " + kakaoRestApiKey);
         headers.setAccept(List.of(MediaType.APPLICATION_JSON));
 
-        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(headers), String.class);
         if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
             return List.of();
         }
