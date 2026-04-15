@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { recommend, castVote } from '../api.js';
+import { recommend } from '../api.js';
 import RecommendForm from '../components/RecommendForm.jsx';
 import CandidateList from '../components/CandidateList.jsx';
-import VoteActions from '../components/VoteActions.jsx';
 import useTeamMembers from '../hooks/useTeamMembers.js';
 
 export default function LunchVotePage() {
@@ -14,12 +13,9 @@ export default function LunchVotePage() {
   const [maxDistance, setMaxDistance] = useState('10');
   const [budget, setBudget] = useState('10000');
   const [candidates, setCandidates] = useState([]);
-  const [memberId, setMemberId] = useState('');
   const { members } = useTeamMembers(teamId);
   const [error, setError] = useState('');
   const [loadingRec, setLoadingRec] = useState(false);
-  const [loadingVote, setLoadingVote] = useState(false);
-  const [voteOk, setVoteOk] = useState('');
   
   const [userCoords, setUserCoords] = useState(null);
   const [locationError, setLocationError] = useState('');
@@ -32,6 +28,7 @@ export default function LunchVotePage() {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
           });
+          console.log('Geolocation coords:', position.coords.latitude, position.coords.longitude);
           setLocationError('');
         },
         (error) => {
@@ -49,7 +46,6 @@ export default function LunchVotePage() {
   async function handleRecommend(e) {
     e.preventDefault();
     setError('');
-    setVoteOk('');
     
     if (!userCoords) {
       setError('Please enable location permissions first.');
@@ -66,6 +62,7 @@ export default function LunchVotePage() {
         latitude: userCoords.latitude,
         longitude: userCoords.longitude,
       };
+      console.log('Recommend request body:', body);
       if (Number.isNaN(body.maxDistance) || Number.isNaN(body.budget)) {
         throw new Error('Invalid maxDistance or budget');
       }
@@ -76,29 +73,6 @@ export default function LunchVotePage() {
       setError(err.message || 'Recommendation failed');
     } finally {
       setLoadingRec(false);
-    }
-  }
-
-  async function handleVote(e, selectedRestaurantId) {
-    e.preventDefault();
-    const can =
-      selectedRestaurantId != null &&
-      memberId !== '' &&
-      !Number.isNaN(Number(memberId));
-    if (!can) return;
-    setError('');
-    setVoteOk('');
-    setLoadingVote(true);
-    try {
-      await castVote({
-        memberId: Number(memberId),
-        restaurantId: selectedRestaurantId,
-      });
-      setVoteOk('투표 저장됨');
-    } catch (err) {
-      setError(err.message || '투표 실패');
-    } finally {
-      setLoadingVote(false);
     }
   }
 
@@ -144,19 +118,14 @@ export default function LunchVotePage() {
       />
 
       <CandidateList candidates={candidates}>
-        {({ selectedRestaurantId }) => (
-          <VoteActions
-            members={members}
-            memberId={memberId}
-            onMemberIdChange={setMemberId}
-            selectedRestaurantId={selectedRestaurantId}
-            candidatesLength={candidates.length}
-            onSubmit={(e) => handleVote(e, selectedRestaurantId)}
-            loadingVote={loadingVote}
-            voteOk={voteOk}
-          />
-        )}
+        {() => null}
       </CandidateList>
+
+      {candidates.length > 0 && (
+        <p style={{ marginTop: 16, color: '#666', fontSize: 14 }}>
+          추천 기능 검증 단계라 투표는 비활성화
+        </p>
+      )}
 
       {error && <p className="error-text">{error}</p>}
       <div className="next-step-wrap">
