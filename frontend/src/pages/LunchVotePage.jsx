@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { recommend, castVote } from '../api.js';
 import RecommendForm from '../components/RecommendForm.jsx';
@@ -20,11 +20,42 @@ export default function LunchVotePage() {
   const [loadingRec, setLoadingRec] = useState(false);
   const [loadingVote, setLoadingVote] = useState(false);
   const [voteOk, setVoteOk] = useState('');
+  
+  const [userCoords, setUserCoords] = useState(null);
+  const [locationError, setLocationError] = useState('');
+
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          setUserCoords({
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude
+          });
+          setLocationError('');
+        },
+        (error) => {
+          console.warn('Geolocation failed:', error);
+          setLocationError('Geolocation failed. Please enable location permissions.');
+          setUserCoords(null);
+        }
+      );
+    } else {
+      setLocationError('Browser does not support geolocation.');
+      setUserCoords(null);
+    }
+  }, []);
 
   async function handleRecommend(e) {
     e.preventDefault();
     setError('');
     setVoteOk('');
+    
+    if (!userCoords) {
+      setError('Please enable location permissions first.');
+      return;
+    }
+    
     setLoadingRec(true);
     try {
       const body = {
@@ -32,15 +63,17 @@ export default function LunchVotePage() {
         location: location.trim(),
         maxDistance: Number(maxDistance),
         budget: Number(budget),
+        latitude: userCoords.latitude,
+        longitude: userCoords.longitude,
       };
       if (Number.isNaN(body.maxDistance) || Number.isNaN(body.budget)) {
-        throw new Error('도보/예산은 숫자로 입력하세요');
+        throw new Error('Invalid maxDistance or budget');
       }
       const list = await recommend(body);
       setCandidates(Array.isArray(list) ? list : []);
     } catch (err) {
       setCandidates([]);
-      setError(err.message || '추천 실패');
+      setError(err.message || 'Recommendation failed');
     } finally {
       setLoadingRec(false);
     }
@@ -85,6 +118,19 @@ export default function LunchVotePage() {
         <Link to={`/team/${teamId}/result`}>결과 보기 →</Link>
       </p>
 
+      {locationError && (
+        <div style={{ 
+          padding: 12, 
+          backgroundColor: '#fff3cd', 
+          border: '1px solid #ffeaa7', 
+          borderRadius: 6,
+          marginBottom: 16,
+          color: '#856404'
+        }}>
+          {locationError}
+        </div>
+      )}
+
       <RecommendForm
         location={location}
         onLocationChange={setLocation}
@@ -94,6 +140,7 @@ export default function LunchVotePage() {
         onBudgetChange={setBudget}
         onSubmit={handleRecommend}
         loading={loadingRec}
+        disabled={!userCoords}
       />
 
       <CandidateList candidates={candidates}>

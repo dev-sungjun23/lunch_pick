@@ -30,9 +30,10 @@ import java.util.UUID;
 public class RecommendationService {
 
     private static final Logger log = LoggerFactory.getLogger(RecommendationService.class);
-    private static final String KAKAO_LOCAL_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
+    private static final String KAKAO_CATEGORY_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/category.json";
     private static final int KAKAO_FETCH_SIZE = 10;
     private static final int CANDIDATE_COUNT = 3;
+    private static final int WALKING_SPEED_M_PER_MIN = 80;
 
     private final TeamRepository teamRepository;
     private final ObjectMapper objectMapper;
@@ -58,24 +59,31 @@ public class RecommendationService {
             return List.of();
         }
 
+        if (request.getLatitude() == null || request.getLongitude() == null) {
+            log.warn("Coordinates are missing: lat={}, lng={}", request.getLatitude(), request.getLongitude());
+            return List.of();
+        }
+
         try {
-            return recommendFromKakao(request.getLocation());
+            return recommendFromKakao(request);
         } catch (Exception e) {
-            log.error("Failed to fetch recommendations from Kakao API. location={}", request.getLocation(), e);
+            log.error("Failed to fetch recommendations from Kakao API. coords={}, maxDistance={}", 
+                     request.getLatitude() + "," + request.getLongitude(), request.getMaxDistance(), e);
             return List.of();
         }
     }
 
-    private List<RestaurantCandidateResponse> recommendFromKakao(String location) throws Exception {
-        String query = (location == null ? "" : location.trim()) + " 음식점";
-        if (query.isBlank()) {
-            return List.of();
-        }
-
+    private List<RestaurantCandidateResponse> recommendFromKakao(RecommendationRequest request) throws Exception {
+        int radiusMeters = request.getMaxDistance() * WALKING_SPEED_M_PER_MIN;
+        
         URI uri = UriComponentsBuilder
-            .fromHttpUrl(KAKAO_LOCAL_SEARCH_URL)
-            .queryParam("query", query)
+            .fromHttpUrl(KAKAO_CATEGORY_SEARCH_URL)
+            .queryParam("category_group_code", "FD6")
+            .queryParam("x", request.getLongitude())
+            .queryParam("y", request.getLatitude())
+            .queryParam("radius", radiusMeters)
             .queryParam("size", KAKAO_FETCH_SIZE)
+            .queryParam("sort", "distance")
             .encode()
             .build()
             .toUri();
@@ -110,11 +118,14 @@ public class RecommendationService {
             }
             String placeUrl = doc.path("place_url").asText("");
 
+            int distanceMeters = doc.path("distance").asInt();
+            int distanceMinutes = (int) Math.ceil(distanceMeters / (double) WALKING_SPEED_M_PER_MIN);
+
             candidates.add(new RestaurantCandidateResponse(
                 generateCandidateId(),
                 name,
                 category,
-                0,
+                distanceMinutes,
                 0,
                 address,
                 placeUrl
@@ -125,8 +136,9 @@ public class RecommendationService {
             return List.of();
         }
 
-        Collections.shuffle(candidates);
-        return candidates.stream().limit(CANDIDATE_COUNT).toList();
+        return candidates.stream()
+            .limit(CANDIDATE_COUNT)
+            .toList();
     }
 
     private String extractLastCategory(String categoryName) {

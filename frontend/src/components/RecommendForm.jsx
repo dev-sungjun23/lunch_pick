@@ -7,6 +7,7 @@ export default function RecommendForm({
   onBudgetChange,
   onSubmit,
   loading,
+  disabled,
 }) {
   return (
     <form
@@ -62,14 +63,15 @@ export default function RecommendForm({
       </div>
       <button
         type="submit"
-        disabled={loading}
+        disabled={loading || disabled}
         style={{
           alignSelf: 'flex-start',
           padding: '8px 12px',
           borderRadius: 8,
+          opacity: (loading || disabled) ? 0.6 : 1,
         }}
       >
-        후보 3개 받기
+        {loading ? 'Loading...' : 'Get 3 candidates'}
       </button>
     </form>
   );
