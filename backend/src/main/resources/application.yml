@@ -9,6 +9,7 @@ app:
   kakao:
     # Render 환경변수: KAKAO_REST_API_KEY
     rest-api-key: ${KAKAO_REST_API_KEY:}
+    # rest-api-key: "363f245ef9270f3a3b7be1e2c33212f7"
 
 spring:
   datasource:

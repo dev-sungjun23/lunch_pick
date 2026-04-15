@@ -21,7 +21,6 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
@@ -30,6 +29,7 @@ import java.util.UUID;
 public class RecommendationService {
 
     private static final Logger log = LoggerFactory.getLogger(RecommendationService.class);
+    private static final String KAKAO_KEYWORD_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/keyword.json";
     private static final String KAKAO_CATEGORY_SEARCH_URL = "https://dapi.kakao.com/v2/local/search/category.json";
     private static final int KAKAO_FETCH_SIZE = 10;
     private static final int CANDIDATE_COUNT = 3;
@@ -59,28 +59,65 @@ public class RecommendationService {
             return List.of();
         }
 
-        if (request.getLatitude() == null || request.getLongitude() == null) {
-            log.warn("Coordinates are missing: lat={}, lng={}", request.getLatitude(), request.getLongitude());
-            return List.of();
-        }
-
         try {
-            return recommendFromKakao(request);
+            // location 문자열을 좌표로 변환
+            double[] coords = convertLocationToCoords(request.getLocation());
+            if (coords == null) {
+                log.warn("Failed to convert location to coordinates: {}", request.getLocation());
+                return List.of();
+            }
+
+            return recommendFromKakao(request, coords[0], coords[1]);
         } catch (Exception e) {
-            log.error("Failed to fetch recommendations from Kakao API. coords={}, maxDistance={}", 
-                     request.getLatitude() + "," + request.getLongitude(), request.getMaxDistance(), e);
+            log.error("Failed to fetch recommendations. location={}, maxDistance={}", 
+                     request.getLocation(), request.getMaxDistance(), e);
             return List.of();
         }
     }
 
-    private List<RestaurantCandidateResponse> recommendFromKakao(RecommendationRequest request) throws Exception {
+    private double[] convertLocationToCoords(String location) throws Exception {
+        URI uri = UriComponentsBuilder
+            .fromHttpUrl(KAKAO_KEYWORD_SEARCH_URL)
+            .queryParam("query", location)
+            .queryParam("size", 1)
+            .encode()
+            .build()
+            .toUri();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "KakaoAK " + kakaoRestApiKey);
+        headers.setAccept(List.of(MediaType.APPLICATION_JSON));
+
+        ResponseEntity<String> response = restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(headers), String.class);
+        if (!response.getStatusCode().is2xxSuccessful() || response.getBody() == null) {
+            return null;
+        }
+
+        JsonNode root = objectMapper.readTree(response.getBody());
+        JsonNode documents = root.path("documents");
+        if (!documents.isArray() || documents.isEmpty()) {
+            return null;
+        }
+
+        JsonNode firstDoc = documents.get(0);
+        double x = firstDoc.path("x").asDouble();
+        double y = firstDoc.path("y").asDouble();
+
+        if (x == 0 || y == 0) {
+            return null;
+        }
+
+        return new double[]{x, y};
+    }
+
+    private List<RestaurantCandidateResponse> recommendFromKakao(RecommendationRequest request, double longitude, double latitude) throws Exception {
         int radiusMeters = request.getMaxDistance() * WALKING_SPEED_M_PER_MIN;
         
         URI uri = UriComponentsBuilder
             .fromHttpUrl(KAKAO_CATEGORY_SEARCH_URL)
             .queryParam("category_group_code", "FD6")
-            .queryParam("x", request.getLongitude())
-            .queryParam("y", request.getLatitude())
+            .queryParam("x", longitude)
+            .queryParam("y", latitude)
             .queryParam("radius", radiusMeters)
             .queryParam("size", KAKAO_FETCH_SIZE)
             .queryParam("sort", "distance")

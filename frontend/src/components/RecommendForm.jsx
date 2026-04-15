@@ -7,7 +7,6 @@ export default function RecommendForm({
   onBudgetChange,
   onSubmit,
   loading,
-  disabled,
 }) {
   return (
     <form
@@ -63,12 +62,12 @@ export default function RecommendForm({
       </div>
       <button
         type="submit"
-        disabled={loading || disabled}
+        disabled={loading}
         style={{
           alignSelf: 'flex-start',
           padding: '8px 12px',
           borderRadius: 8,
-          opacity: (loading || disabled) ? 0.6 : 1,
+          opacity: loading ? 0.6 : 1,
         }}
       >
         {loading ? 'Loading...' : 'Get 3 candidates'}
